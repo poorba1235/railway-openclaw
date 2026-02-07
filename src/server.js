@@ -18,6 +18,11 @@ const PORT = Number.parseInt(
   10,
 );
 
+console.log("[wrapper] Starting...");
+console.log(`[wrapper] PORT configured as: ${PORT}`);
+console.log(`[wrapper] Env: PORT=${process.env.PORT}, OPENCLAW_PUBLIC_PORT=${process.env.OPENCLAW_PUBLIC_PORT}`);
+
+
 // State/workspace
 // OpenClaw defaults to ~/.openclaw. Keep CLAWDBOT_* as backward-compat aliases.
 const STATE_DIR =
@@ -984,7 +989,7 @@ app.use(async (req, res) => {
 });
 
 const server = app.listen(PORT, "0.0.0.0", () => {
-  console.log(`[wrapper] listening on :${PORT}`);
+  console.log(`[wrapper] LISTENING on port ${PORT}`);
   console.log(`[wrapper] state dir: ${STATE_DIR}`);
   console.log(`[wrapper] workspace dir: ${WORKSPACE_DIR}`);
   console.log(`[wrapper] gateway token: ${OPENCLAW_GATEWAY_TOKEN ? "(set)" : "(missing)"}`);
@@ -993,6 +998,11 @@ const server = app.listen(PORT, "0.0.0.0", () => {
     console.warn("[wrapper] WARNING: SETUP_PASSWORD is not set; /setup will error.");
   }
   // Don't start gateway unless configured; proxy will ensure it starts.
+});
+
+server.on('error', (err) => {
+  console.error('[wrapper] FATAL: Server failed to start:', err);
+  process.exit(1);
 });
 
 server.on("upgrade", async (req, socket, head) => {
