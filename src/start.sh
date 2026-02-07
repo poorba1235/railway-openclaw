@@ -1,18 +1,18 @@
 #!/bin/bash
 set -e
 
-# Create a 1GB swap file in the ephemeral volume if not present (Railway volumes might persist it, which is fine)
-if [ ! -f /tmp/swapfile ]; then
-  echo "[start.sh] Creating 1GB swapfile in /tmp..."
-  dd if=/dev/zero of=/tmp/swapfile bs=1M count=1024
-  chmod 600 /tmp/swapfile
-  mkswap /tmp/swapfile
+# Create a 512MB swap file in /data (persistent volume) if not present
+if [ ! -f /data/swapfile ]; then
+  echo "[start.sh] Creating 512MB swapfile in /data..."
+  # 512MB ensures we don't fill the entire 1GB volume (leaving ~500MB for app data)
+  dd if=/dev/zero of=/data/swapfile bs=1M count=512
+  chmod 600 /data/swapfile
+  mkswap /data/swapfile
 fi
 
 # Enable swap (best effort, requires privileges usually)
-# Railway usually allows this on their platform if user is root (which we are)
 echo "[start.sh] Enabling swap..."
-swapon /tmp/swapfile || echo "[start.sh] Failed to enable swap (permission denied?)"
+swapon /data/swapfile || echo "[start.sh] Failed to enable swap (permission denied?)"
 
 # Start the application
 echo "[start.sh] Starting server..."

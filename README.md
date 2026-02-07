@@ -1,60 +1,50 @@
-# OpenClaw Railway Template (1‑click deploy)
+# OpenClaw Fly.io Template
 
-This repo packages **OpenClaw** for Railway with a small **/setup** web wizard so users can deploy and onboard **without running any commands**.
+This repo packages **OpenClaw** for Fly.io with a small **/setup** web wizard.
 
 ## What you get
 
 - **OpenClaw Gateway + Control UI** (served at `/` and `/openclaw`)
 - A friendly **Setup Wizard** at `/setup` (protected by a password)
-- Persistent state via **Railway Volume** (so config/credentials/memory survive redeploys)
-- One-click **Export backup** (so users can migrate off Railway later)
-- **Import backup** from `/setup` (advanced recovery)
+- Persistent state via **Fly Volume** (so config/credentials/memory survive redeploys)
+- **Swap enabled** (to run comfortably on small 256MB/512MB instances)
 
-## How it works (high level)
+## Fly.io deploy instructions
 
-- The container runs a wrapper web server.
-- The wrapper protects `/setup` with `SETUP_PASSWORD`.
-- During setup, the wrapper runs `openclaw onboard --non-interactive ...` inside the container, writes state to the volume, and then starts the gateway.
-- After setup, **`/` is OpenClaw**. The wrapper reverse-proxies all traffic (including WebSockets) to the local gateway process.
+1) **Install Fly CLI**: `curl -L https://fly.io/install.sh | sh` (or `brew install flyctl`)
+2) **Login**: `fly auth login`
+3) **Launch**:
+   ```bash
+   fly launch --no-deploy
+   ```
+   - Accept the defaults (copy existing fly.toml settings if asked).
+   - Say **Yes** to copy configuration to the new app.
 
-## Railway deploy instructions (what you’ll publish as a Template)
+4) **Create Volume** (Critical for persistence):
+   ```bash
+   fly volumes create openclaw_data --size 1
+   ```
+   (Use the same region as your app, e.g., `iad` or `lhr`. Check `fly.toml` if unsure.)
 
-In Railway Template Composer:
-
-1) Create a new template from this GitHub repo.
-2) Add a **Volume** mounted at `/data`.
-3) Set the following variables:
-
-Required:
-- `SETUP_PASSWORD` — user-provided password to access `/setup`
-
-Recommended:
-- `OPENCLAW_STATE_DIR=/data/.openclaw`
-- `OPENCLAW_WORKSPACE_DIR=/data/workspace`
-
-Optional:
-- `OPENCLAW_GATEWAY_TOKEN` — if not set, the wrapper generates one (not ideal). In a template, set it using a generated secret.
-
-Notes:
-- This template pins OpenClaw to a known-good version by default via Docker build arg `OPENCLAW_GIT_REF`.
-
-4) Enable **Public Networking** (HTTP). Railway will assign a domain.
-5) Deploy.
+5) **Deploy**:
+   ```bash
+   fly deploy
+   ```
 
 Then:
-- Visit `https://<your-app>.up.railway.app/setup`
-- Complete setup
-- Visit `https://<your-app>.up.railway.app/` and `/openclaw`
+- Visit `https://<your-app>.fly.dev/setup`
+- Complete setup (Password: `test`)
+- Visit `https://<your-app>.fly.dev/`
 
-## Getting chat tokens (so you don’t have to scramble)
+### Getting chat tokens
 
-### Telegram bot token
+#### Telegram bot token
 1) Open Telegram and message **@BotFather**
 2) Run `/newbot` and follow the prompts
 3) BotFather will give you a token that looks like: `123456789:AA...`
 4) Paste that token into `/setup`
 
-### Discord bot token
+#### Discord bot token
 1) Go to the Discord Developer Portal: https://discord.com/developers/applications
 2) **New Application** → pick a name
 3) Open the **Bot** tab → **Add Bot**
@@ -64,33 +54,13 @@ Then:
 ## Local smoke test
 
 ```bash
-docker build -t openclaw-railway-template .
+docker build -t openclaw-fly .
 
-docker run --rm -p 8082:8082 \
-  -e PORT=8082 \
+docker run --rm -p 8080:8080 \
+  -e PORT=8080 \
   -e SETUP_PASSWORD=test \
-  -e OPENCLAW_STATE_DIR=/data/.openclaw \
-  -e OPENCLAW_WORKSPACE_DIR=/data/workspace \
   -v $(pwd)/.tmpdata:/data \
-  openclaw-railway-template
+  openclaw-fly
 
-# open http://localhost:8082/setup (password: test)
+# open http://localhost:8080/setup (password: test)
 ```
-
----
-
-## Official template / endorsements
-
-- Officially recommended by OpenClaw: <https://docs.openclaw.ai/railway>
-- Railway announcement (official): [Railway tweet announcing 1‑click OpenClaw deploy](https://x.com/railway/status/2015534958925013438)
-
-  ![Railway official tweet screenshot](assets/railway-official-tweet.jpg)
-
-- Endorsement from Railway CEO: [Jake Cooper tweet endorsing the OpenClaw Railway template](https://x.com/justjake/status/2015536083514405182)
-
-  ![Jake Cooper endorsement tweet screenshot](assets/railway-ceo-endorsement.jpg)
-
-- Created and maintained by **Vignesh N (@vignesh07)**
-- **1800+ deploys on Railway and counting** [Link to template on Railway](https://railway.com/deploy/clawdbot-railway-template)
-
-![Railway template deploy count](assets/railway-deploys.jpg)
