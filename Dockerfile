@@ -66,4 +66,7 @@ COPY src ./src
 ENV OPENCLAW_PUBLIC_PORT=8080
 ENV PORT=8080
 EXPOSE 8080
-CMD ["node", "src/server.js"]
+COPY src/start.sh ./src/start.sh
+RUN chmod +x ./src/start.sh
+
+CMD ["./src/start.sh"]
