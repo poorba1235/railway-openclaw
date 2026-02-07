@@ -14,7 +14,7 @@ import * as tar from "tar";
 // Prefer OPENCLAW_PUBLIC_PORT (set in the Dockerfile / template) over PORT.
 // Keep CLAWDBOT_PUBLIC_PORT as a backward-compat alias for older templates.
 const PORT = Number.parseInt(
-  process.env.PORT ?? process.env.OPENCLAW_PUBLIC_PORT ?? process.env.CLAWDBOT_PUBLIC_PORT ?? "8082",
+  process.env.PORT ?? process.env.OPENCLAW_PUBLIC_PORT ?? process.env.CLAWDBOT_PUBLIC_PORT ?? "8080",
   10,
 );
 
