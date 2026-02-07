@@ -65,5 +65,7 @@ COPY src ./src
 # The wrapper listens on this port.
 ENV OPENCLAW_PUBLIC_PORT=8080
 ENV PORT=8080
+# Limit Node.js heap to avoid OOM kills on small Railway plans (512MB)
+ENV NODE_OPTIONS="--max-old-space-size=460"
 EXPOSE 8080
 CMD ["node", "src/server.js"]
