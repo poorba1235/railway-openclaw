@@ -151,6 +151,8 @@ async function startGateway() {
     stdio: "inherit",
     env: {
       ...process.env,
+      // Limit child process memory to ~384MB to fit in 512MB container alongside wrapper
+      NODE_OPTIONS: "--max-old-space-size=384",
       OPENCLAW_STATE_DIR: STATE_DIR,
       OPENCLAW_WORKSPACE_DIR: WORKSPACE_DIR,
       // Backward-compat aliases
@@ -526,6 +528,8 @@ function runCmd(cmd, args, opts = {}) {
       ...opts,
       env: {
         ...process.env,
+        // Limit child process memory to ~384MB to fit in 512MB container alongside wrapper
+        NODE_OPTIONS: "--max-old-space-size=384",
         OPENCLAW_STATE_DIR: STATE_DIR,
         OPENCLAW_WORKSPACE_DIR: WORKSPACE_DIR,
         // Backward-compat aliases
