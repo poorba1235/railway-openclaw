@@ -228,10 +228,17 @@ function requireSetupAuth(req, res, next) {
 
 const app = express();
 app.disable("x-powered-by");
+
+// EMERGENCY HEALTH CHECK: Respond immediately to Railway probes
+app.get("/setup/healthz", (_req, res) => {
+  console.log("[wrapper] Health check probe received");
+  res.json({ ok: true });
+});
+
 app.use(express.json({ limit: "1mb" }));
 
 // Minimal health endpoint for Railway.
-app.get("/setup/healthz", (_req, res) => res.json({ ok: true }));
+// app.get("/setup/healthz", (_req, res) => res.json({ ok: true })); // Moved up
 
 app.get("/setup/app.js", requireSetupAuth, (_req, res) => {
   // Serve JS for /setup (kept external to avoid inline encoding/template issues)
